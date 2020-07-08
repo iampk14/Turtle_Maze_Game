@@ -1,0 +1,150 @@
+import turtle
+import time
+import sys
+import keyboard
+import cv2
+import numpy as np
+
+start = int(time.time())
+elapsed = 0
+
+
+backgroud_imag='maze.gif'
+gif = cv2.VideoCapture(backgroud_imag)
+ret,frame = gif.read()
+
+image=cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
+
+kernel = np.ones((9,9),np.uint8)
+#cv2.imshow("oroiginal image",image)
+erosion = cv2.erode(image,kernel,iterations = 1)
+#cv2.imshow("Erroded image",erosion)
+#cv2.waitKey()
+
+height,width=image.shape
+
+boundry=[]
+for i in range(height):
+    for j in range(width):
+        if erosion[i,j] < 150:
+            boundry.append([j-int(width/2),-1*i+int(height/2)])
+
+t=turtle.Turtle(shape="turtle")
+t.fillcolor("blue")
+t.penup()
+t.pencolor("blue")
+t.speed(5)
+t.goto(-25,-360)
+t.left(90)
+
+s=turtle.Screen()
+s.setup(width, height)
+s.bgpic(backgroud_imag)
+
+step_forward=3
+step_angle=1
+flag="P"
+
+origin=[-25,-360]
+
+t.shape("circle")
+t.fillcolor("green")
+t.goto(-230,250)
+g = t.stamp()  
+t.fillcolor("red")
+t.goto(75, 20)
+r = t.stamp()
+t.fillcolor("orange")
+t.goto(180, 100)
+o = t.stamp()
+t.fillcolor("yellow")
+t.goto(-180, -205)
+y = t.stamp()
+t.fillcolor("blue")
+t.shape("turtle")
+
+def goto_home():
+    t.goto(origin)
+
+def blink(num,delay):
+    while num:
+        t.fillcolor("red")
+        time.sleep(delay)
+        t.fillcolor("blue")
+        time.sleep(delay)
+        num-=1
+
+goto_home()
+
+while elapsed < 300:
+    # print(keyboard.read_key(), " key was pressed.")
+    if keyboard.is_pressed("up"):
+        flag = "F"
+    if keyboard.is_pressed("down"):
+        flag = "B"
+    if keyboard.is_pressed("right"):
+        flag = "R"
+    if keyboard.is_pressed("left"):
+        flag = "L"
+    if keyboard.is_pressed("space"):
+        flag = "P"
+    if keyboard.is_pressed("esc"):
+        break
+    if keyboard.is_pressed("b"):
+        blink(2,0.1)
+
+    #print("flag is :",flag)
+
+    # MOIVING OR STOPING THE TURTLE
+    if flag == "F":
+        t.forward(step_forward)
+    elif flag == "B":
+        t.backward(step_forward)
+    elif flag == "R":
+        t.right(step_angle)
+    elif flag == "L":
+        t.left(step_angle)
+    elif flag == "P":
+        t.forward(0)
+
+    pos=[int(t.pos()[0]),int(t.pos()[1])]
+    if pos in boundry:
+        t.forward(0)
+        blink(5,0.1)
+        t.hideturtle()
+        goto_home()
+        t.showturtle()
+        flag="P"
+
+
+    if (t.xcor() < -70 and t.xcor() >-80)  and (t.ycor() > -125 and t.ycor() < 60):
+        print("You win the game")
+        break
+
+    if (t.xcor() < -225 and t.xcor() > -235) and (t.ycor() < 255 and t.ycor() > 245):
+        t.fillcolor("green")
+        
+        t.clearstamp(g)
+
+    if (t.xcor() < 85 and t.xcor() > 65) and (t.ycor() < 30 and t.ycor() > 10):
+        t.fillcolor("red")
+
+        t.clearstamp(r)
+
+    if (t.xcor() < 190 and t.xcor() > 170) and (t.ycor() < 110 and t.ycor() > 90):
+        t.fillcolor("orange")
+
+        t.clearstamp(o)
+
+    if (t.xcor() < -170 and t.xcor() > -190) and (t.ycor() < -195 and t.ycor() > -215):
+        t.fillcolor("yellow")
+
+        t.clearstamp(y)
+
+
+
+    elapsed = time.time() - start
+
+
+print(t.pos())
+s.exitonclick()
